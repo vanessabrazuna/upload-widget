@@ -1,7 +1,11 @@
 @import "tailwindcss";
 
-:root {
+@theme {
   --font-sans: "Inter", sans-serif;
+  --color-zinc-50: #fafafa;
+  --color-zinc-100: #f4f4f5;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-800: #27272a;
   --opacity-2: 0.02;
   --text-xxs: 0.625rem;
   --shadow-shape:
@@ -15,7 +19,6 @@
     0px 0px 0px 1px rgba(0, 0, 0, 0.25),
     inset 0px 1px 0px rgba(255, 255, 255, 0.02),
     inset 0px 0px 0px 1px rgba(255, 255, 255, 0.02);
-  --animate-border: border 2s linear infinite;
 }
 
 @keyframes border {
