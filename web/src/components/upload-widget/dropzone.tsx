@@ -1,6 +1,10 @@
 import { useDropzone } from 'react-dropzone'
+import { CircularProgressBar } from '../ui/circular-progress-bar'
 
 export function Dropzone() {
+  const isThereAnyPendingUploads = true
+  const uploadsGlobalPercentage = 66
+
   const { getRootProps, getInputProps, isDragAccept } = useDropzone({
     multiple: true,
     accept: {
@@ -21,8 +25,23 @@ export function Dropzone() {
       >
         <input type="file" {...getInputProps()} />
 
-        <span className="text-xs">Drop your files here or</span>
-        <span className="text-xs underline">click to open picker</span>
+        {isThereAnyPendingUploads ? (
+          <div className='flex flex-col gap-2.5 items-center'>
+            <CircularProgressBar
+              size={56}
+              strokeWidth={4}
+              progress={uploadsGlobalPercentage}
+            />
+            <span className="text-xs">
+              Uploading 2 files...
+            </span>
+          </div>
+        ) : (
+          <>
+            <span className="text-xs">Drop your files here or</span>
+            <span className="text-xs underline">click to open picker</span>
+          </>
+        )}
       </div>
 
       <span className="text-xxs text-zinc-400">
