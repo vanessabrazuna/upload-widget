@@ -5,7 +5,7 @@ import { Title } from "./title"
 export function MinimizedButton() {
   return (
     <Collapsible.Trigger
-      className="group w-full bg-white/2 py-3 px-5 flex items-center justify-between"
+      className="group w-full bg-white/2 py-3 px-5 flex items-center justify-between gap-5"
     >
       <Title />
 

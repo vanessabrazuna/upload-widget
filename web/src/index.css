@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+:root {
+  --border-angle: 0deg;
+}
+
 @theme {
   --font-sans: "Inter", sans-serif;
   --color-zinc-50: #fafafa;
@@ -20,6 +24,17 @@
     inset 0px 1px 0px rgba(255, 255, 255, 0.02),
     inset 0px 0px 0px 1px rgba(255, 255, 255, 0.02);
 }
+
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+.animate-border {
+  animation: border 2s linear infinite;
+}
+
 
 @keyframes border {
   to {
