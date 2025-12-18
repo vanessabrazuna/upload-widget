@@ -23,6 +23,7 @@ export function UploadList() {
               <UploadItem
                 key={uploadId}
                 upload={upload}
+                uploadId={uploadId}
               />
             )
           })}
