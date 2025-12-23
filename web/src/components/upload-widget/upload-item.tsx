@@ -16,6 +16,15 @@ export function UploadItem({
 }: UploadItemProps) {
   const cancelUpload = useUploads(store => store.cancelUpload)
 
+  const progress = Math.min(
+    upload.compressedSizeInBytes
+      ? Math.round(
+          (upload.uploadSizeInBytes * 100) / upload.compressedSizeInBytes
+        )
+      : 0,
+    100
+  )
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -31,7 +40,7 @@ export function UploadItem({
         </span>
 
         <span className="text-xxs text-zinc-400 flex items-center gap-1.5">
-          <span className="line-through">{formatBytes(upload.file.size)}</span>
+          <span className="line-through">{formatBytes(upload.originalSizeInBytes)}</span>
           <div className="size-1 rounded-full bg-zinc-700" />
 
           <span>
@@ -45,7 +54,7 @@ export function UploadItem({
 
           {upload.status === 'success' && <span>100%</span>}
 
-          {upload.status === 'progress' && <span>45%</span>}
+          {upload.status === 'progress' && <span>{progress}%</span>}
 
           {upload.status === 'error' && 
             <span className="text-red-400">
@@ -63,12 +72,13 @@ export function UploadItem({
 
       <Progress.Root
         data-status={upload.status}
+        value={progress}
         className="group bg-zinc-800 rounded-full h-1 overflow-hidden"
       >
          <Progress.Indicator
           className="bg-indigo-500 h-1 group-data-[status=success]:bg-green-400 group-data-[status=error]:bg-red-400 group-data-[status=canceled]:bg-yellow-400 transition-all"
           style={{
-            width: upload.status === "progress" ? "43%" : "100%",
+            width: upload.status === "progress" ? `${progress}%` : "100%",
           }}
         />
       </Progress.Root>
@@ -84,7 +94,9 @@ export function UploadItem({
 
         <Button 
           size="icon-sm"
-          disabled={upload.status !== 'success'}
+          disabled={!upload.remoteUrl}
+          onClick={() => 
+            upload.remoteUrl && navigator.clipboard.writeText(upload.remoteUrl)}
         >
           <Link2 className="size-4" strokeWidth={1.5} />
           <span className="sr-only">Copy remote URL</span>
