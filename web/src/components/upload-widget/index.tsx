@@ -18,7 +18,7 @@ export function UploadWidget() {
 				animate={isWidgetOpen ? "open" : "closed"}
 				variants={{
           closed: {
-            width: "max-content",
+            width: "220px",
             height: 44,
             transition: {
               type: "spring",

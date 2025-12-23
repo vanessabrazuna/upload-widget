@@ -1,20 +1,25 @@
-import { motion } from "motion/react"
 import * as Progress from "@radix-ui/react-progress"
+
 import { Download, ImageUp, Link2, RefreshCcw, X } from "lucide-react"
-import { Button } from "../ui/button"
+
+import { motion } from "motion/react"
 import { useUploads, type Upload } from "../../store/uploads"
 import { formatBytes } from "../../utils/format-bytes"
+import { downloadUrl } from "../../utils/download-url"
+import { Button } from "../ui/button"
 
-interface UploadItemProps {
-  uploadId: string
+
+interface UploadWidgetUploadItemProps {
   upload: Upload
+  uploadId: string
 }
 
 export function UploadItem({
   upload,
   uploadId,
-}: UploadItemProps) {
-  const cancelUpload = useUploads(store => store.cancelUpload)
+}: UploadWidgetUploadItemProps) {
+  const cancelUpload = useUploads((store) => store.cancelUpload)
+  const retryUpload = useUploads((store) => store.retryUpload)
 
   const progress = Math.min(
     upload.compressedSizeInBytes
@@ -27,55 +32,57 @@ export function UploadItem({
 
   return (
     <motion.div
+      className="p-3 rounded-lg flex flex-col gap-3 shadow-shape-content bg-white/2 relative overflow-hidden"
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-      className="p-3 rounded-lg flex flex-col gap-3 shadow-shape-content
-      bg-white/2 overflow-hidden relative"
+      animate={{
+        opacity: 1,
+      }}
+      transition={{ duration: 0.4 }}
     >
       <div className="flex flex-col gap-1">
         <span className="text-xs font-medium flex items-center gap-1">
           <ImageUp className="size-3 text-zinc-300" strokeWidth={1.5} />
-          <span>{upload.name}</span>
+          <span className="max-w-[180px] truncate">{upload.name}</span>
         </span>
 
-        <span className="text-xxs text-zinc-400 flex items-center gap-1.5">
-          <span className="line-through">{formatBytes(upload.originalSizeInBytes)}</span>
-          <div className="size-1 rounded-full bg-zinc-700" />
-
-          <span>
-            300KB
-            <span className="text-green-400 ml-1">
-              -94%
-            </span>
+        <span className="text-xxs text-zinc-400 flex gap-1.5 items-center">
+          <span className="line-through">
+            {formatBytes(upload.originalSizeInBytes)}
           </span>
-
+          <div className="size-1 rounded-full bg-zinc-700" />
+          <span>
+            {formatBytes(upload.compressedSizeInBytes ?? 0)}
+            {upload.compressedSizeInBytes && (
+              <span className="text-green-400 ml-1">
+                -
+                {Math.round(
+                  ((upload.originalSizeInBytes - upload.compressedSizeInBytes) *
+                    100) /
+                    upload.originalSizeInBytes
+                )}
+                %
+              </span>
+            )}
+          </span>
           <div className="size-1 rounded-full bg-zinc-700" />
 
-          {upload.status === 'success' && <span>100%</span>}
-
-          {upload.status === 'progress' && <span>{progress}%</span>}
-
-          {upload.status === 'error' && 
-            <span className="text-red-400">
-              Error
-            </span>
-          }
-
-          { upload.status === 'canceled' && 
-            <span className="text-yellow-400">
-              Canceled
-            </span>
-          }
+          {upload.status === "success" && <span>100%</span>}
+          {upload.status === "progress" && <span>{progress}%</span>}
+          {upload.status === "error" && (
+            <span className="text-red-400">Error</span>
+          )}
+          {upload.status === "canceled" && (
+            <span className="text-yellow-400">Canceled</span>
+          )}
         </span>
       </div>
 
       <Progress.Root
-        data-status={upload.status}
         value={progress}
-        className="group bg-zinc-800 rounded-full h-1 overflow-hidden"
+        data-status={upload.status}
+        className="bg-zinc-800 rounded-full h-1 overflow-hidden group"
       >
-         <Progress.Indicator
+        <Progress.Indicator
           className="bg-indigo-500 h-1 group-data-[status=success]:bg-green-400 group-data-[status=error]:bg-red-400 group-data-[status=canceled]:bg-yellow-400 transition-all"
           style={{
             width: upload.status === "progress" ? `${progress}%` : "100%",
@@ -83,36 +90,43 @@ export function UploadItem({
         />
       </Progress.Root>
 
-      <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
-        <Button 
+      <div className="absolute top-2 right-2 flex items-center gap-1">
+        <Button
           size="icon-sm"
-          disabled={upload.status !== 'success'}
+          aria-disabled={!upload.remoteUrl}
+          onClick={() => {
+            if (upload.remoteUrl) {
+              downloadUrl(upload.remoteUrl)
+            }
+          }}
         >
           <Download className="size-4" strokeWidth={1.5} />
           <span className="sr-only">Download compressed image</span>
         </Button>
 
-        <Button 
+        <Button
           size="icon-sm"
           disabled={!upload.remoteUrl}
-          onClick={() => 
-            upload.remoteUrl && navigator.clipboard.writeText(upload.remoteUrl)}
+          onClick={() =>
+            upload.remoteUrl && navigator.clipboard.writeText(upload.remoteUrl)
+          }
         >
           <Link2 className="size-4" strokeWidth={1.5} />
           <span className="sr-only">Copy remote URL</span>
         </Button>
 
-        <Button 
-          size="icon-sm"
+        <Button
           disabled={!["canceled", "error"].includes(upload.status)}
+          size="icon-sm"
+          onClick={() => retryUpload(uploadId)}
         >
           <RefreshCcw className="size-4" strokeWidth={1.5} />
           <span className="sr-only">Retry upload</span>
         </Button>
 
-        <Button 
+        <Button
+          disabled={upload.status !== "progress"}
           size="icon-sm"
-          disabled={upload.status !== 'progress'}
           onClick={() => cancelUpload(uploadId)}
         >
           <X className="size-4" strokeWidth={1.5} />
